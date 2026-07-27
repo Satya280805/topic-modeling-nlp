@@ -1,6 +1,6 @@
 # Python-Based Topic Modeling using Django and NLP
 
-A **Python-based Django web application** that leverages **Natural Language Processing (NLP)** and **Latent Dirichlet Allocation (LDA)** to extract meaningful topics from text documents and web content. The application preprocesses textual data, identifies hidden topics, and presents the results through a user-friendly web interface.
+A **Python-based Django web application** that leverages **Natural Language Processing (NLP)** and **Latent Dirichlet Allocation (LDA)** to extract meaningful topics from text documents and web content. The application preprocesses textual data, identifies hidden topics, and presents the extracted topics through an intuitive and user-friendly web interface.
 
 ---
 
@@ -8,13 +8,14 @@ A **Python-based Django web application** that leverages **Natural Language Proc
 
 - Upload text documents for topic analysis
 - Extract textual content from website URLs
-- Text preprocessing using NLP techniques
+- Text preprocessing using NLP techniques:
   - Tokenization
   - Stopword Removal
   - Lemmatization
 - Topic extraction using **Latent Dirichlet Allocation (LDA)**
 - Interactive Django web interface
 - Display extracted topics with representative keywords
+- URL-based text extraction using web scraping
 
 ---
 
@@ -26,7 +27,7 @@ A **Python-based Django web application** that leverages **Natural Language Proc
 ### Framework
 - Django
 
-### Machine Learning & NLP
+### Machine Learning & Natural Language Processing
 - Scikit-learn
 - NLTK
 - Latent Dirichlet Allocation (LDA)
@@ -47,31 +48,34 @@ A **Python-based Django web application** that leverages **Natural Language Proc
 
 ## 📁 Project Structure
 
-```
+```text
 topic-modeling-nlp/
 │
-├── app/
+├── topic_app/
+├── topic_modeling_project/
 ├── templates/
 ├── static/
 ├── media/
+├── Sample_Data/
 ├── manage.py
 ├── requirements.txt
-├── db.sqlite3
-└── README.md
+├── README.md
+├── .gitignore
+└── db.sqlite3
 ```
 
 ---
 
 ## ⚙️ Installation
 
-### Clone the repository
+### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/<username>/topic-modeling-nlp.git
+git clone https://github.com/<your-username>/topic-modeling-nlp.git
 cd topic-modeling-nlp
 ```
 
-### Create a virtual environment
+### 2. Create a Virtual Environment
 
 **Windows**
 
@@ -87,13 +91,13 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-### Install dependencies
+### 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Download NLTK resources
+### 4. Download NLTK Resources
 
 ```python
 import nltk
@@ -103,13 +107,13 @@ nltk.download("stopwords")
 nltk.download("wordnet")
 ```
 
-### Apply migrations
+### 5. Apply Database Migrations
 
 ```bash
 python manage.py migrate
 ```
 
-### Run the application
+### 6. Run the Development Server
 
 ```bash
 python manage.py runserver
@@ -125,22 +129,22 @@ http://127.0.0.1:8000/
 
 ## 🔍 How It Works
 
-1. Upload a text document or enter a website URL.
-2. The application extracts textual content.
-3. Text is preprocessed using NLP techniques:
+1. Upload a text document or provide a website URL.
+2. The application extracts textual content from the uploaded file or webpage.
+3. The extracted text is preprocessed using:
    - Tokenization
    - Stopword Removal
    - Lemmatization
 4. A document-term matrix is generated using **CountVectorizer**.
 5. **Latent Dirichlet Allocation (LDA)** identifies the underlying topics.
-6. The discovered topics and keywords are displayed through the Django interface.
+6. The extracted topics and representative keywords are displayed through the Django web interface.
 
 ---
 
 ## 📦 Requirements
 
-- Django 4.2+
 - Python 3.10+
+- Django 4.2+
 - Scikit-learn
 - NLTK
 - NumPy
@@ -165,36 +169,49 @@ http://127.0.0.1:8000/
 ## 🚀 Future Enhancements
 
 - Interactive topic visualization
-- Support for PDF and DOCX files
+- Support for PDF and DOCX documents
 - Topic coherence evaluation
-- User authentication
+- User authentication and login system
 - Export results to PDF and Excel
-- Additional topic modeling algorithms (NMF, BERTopic)
+- Integration of advanced topic modeling algorithms such as NMF and BERTopic
 
 ---
 
 ## 👥 Team
 
-This project was developed as a collaborative academic project by:
+This project was developed collaboratively as part of an academic mini project.
 
-- Kalavalapalli Venkata Sesha Satyanarayana
-- Katta Udaya Lakshmi
-- Kandala Vineetha
-- Kukkala Dileep Babu
-- Pinishetty Srinivas
+| Team Member | Role |
+|-------------|------|
+| **Kalavalapalli Venkata Sesha Satyanarayana** | **Team Lead, Repository Owner & Core Contributor** |
+| **Katta Udaya Lakshmi** | Core Contributor |
+| **Kandala Vineetha** | Team Member |
+| **Kukkala Dileep Babu** | Team Member |
+| **Pinishetty Srinivas** | Team Member |
 
 ---
 
-### My Contribution
+## 💻 My Contributions
 
-As a core contributor to this project, I contributed to:
+As the **Team Lead, Repository Owner, and Core Contributor**, I was responsible for:
 
-- Developing the topic modeling pipeline using Python and NLP
-- Implementing Django application features
-- Data preprocessing and text analysis
-- Testing and debugging the application
-- Documentation and project integration
+- Leading project planning, task allocation, and team coordination
+- Designing the overall project workflow and implementation strategy
+- Developing the topic modeling pipeline using **Python**, **Natural Language Processing (NLP)**, and **Latent Dirichlet Allocation (LDA)**
+- Implementing Django backend modules and application functionality
+- Integrating web scraping for URL-based text extraction
+- Performing text preprocessing, feature extraction, and data analysis
+- Testing, debugging, and integrating project components
+- Preparing project documentation and maintaining the GitHub repository
+
+---
+
+## 🤝 Acknowledgements
+
+I sincerely thank all my teammates for their valuable contributions, collaboration, and support throughout the development of this academic project.
+
+---
 
 ## 📄 License
 
-This project is intended for educational and academic purposes.
+This project is intended solely for **educational and academic purposes**.
