@@ -185,6 +185,16 @@ This project was developed as a collaborative academic project by:
 
 ---
 
+### My Contribution
+
+As a core contributor to this project, I contributed to:
+
+- Developing the topic modeling pipeline using Python and NLP
+- Implementing Django application features
+- Data preprocessing and text analysis
+- Testing and debugging the application
+- Documentation and project integration
+
 ## 📄 License
 
 This project is intended for educational and academic purposes.
