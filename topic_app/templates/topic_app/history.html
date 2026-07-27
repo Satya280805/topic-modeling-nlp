@@ -1,0 +1,99 @@
+{% extends "topic_app/base.html" %}
+
+{% block title %}LDA Lab — Analysis History{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-eyebrow">// ANALYSIS LOG</div>
+  <h1>Past <span class="accent">Analyses</span></h1>
+  <p class="page-header-sub">All previous topic modeling runs, newest first.</p>
+</div>
+
+{% if analyses %}
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-icon">🗂️</div>
+    <div>
+      <div class="card-title">Analysis Records</div>
+      <div class="card-subtitle">{{ analyses|length }} record(s) found</div>
+    </div>
+  </div>
+
+  <div style="overflow-x:auto;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Input Type</th>
+          <th>Topics</th>
+          <th>Words/Topic</th>
+          <th>Source</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in analyses %}
+        <tr>
+          <td style="font-family:var(--font-mono); color:var(--amber);">{{ a.pk }}</td>
+          <td>
+            {% if a.input_type == 'manual' %}
+              <span class="badge badge-amber">✍️ Manual</span>
+            {% elif a.input_type == 'txt' %}
+              <span class="badge badge-green">📄 TXT</span>
+            {% elif a.input_type == 'csv' %}
+              <span class="badge badge-blue">📊 CSV</span>
+            {% elif a.input_type == 'url' %}
+              <span class="badge badge-purple">🌐 URL</span>
+            {% endif %}
+          </td>
+          <td style="font-family:var(--font-mono); color:var(--text-primary);">{{ a.num_topics }}</td>
+          <td style="font-family:var(--font-mono);">{{ a.num_words }}</td>
+          <td style="font-family:var(--font-mono); font-size:0.72rem; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            {% if a.source_url %}
+              <a href="{{ a.source_url }}" target="_blank" style="color:var(--amber);">{{ a.source_url|truncatechars:40 }}</a>
+            {% elif a.uploaded_file %}
+              {{ a.uploaded_file.name|truncatechars:30 }}
+            {% else %}
+              {{ a.raw_text|truncatechars:40 }}
+            {% endif %}
+          </td>
+          <td style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted);">
+            {{ a.created_at|date:"M d, Y H:i" }}
+          </td>
+          <td>
+            <div style="display:flex; gap:6px;">
+              <a href="{% url 'results' a.pk %}" class="btn btn-ghost btn-sm">View</a>
+              <form method="post" action="{% url 'delete_analysis' a.pk %}"
+                    onsubmit="return confirm('Delete analysis #{{ a.pk }}?')">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">✗</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% else %}
+
+<!-- Empty state -->
+<div class="card" style="text-align:center; padding:4rem 2rem;">
+  <div style="font-size:3rem; margin-bottom:1rem;">🧠</div>
+  <div style="font-family:var(--font-display); font-size:1.2rem; font-weight:700; color:var(--text-primary); margin-bottom:0.5rem;">
+    No analyses yet
+  </div>
+  <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted); margin-bottom:1.5rem;">
+    Run your first topic modeling analysis to see results here.
+  </div>
+  <a href="{% url 'home' %}" class="btn btn-primary">⬡ Start Analyzing</a>
+</div>
+
+{% endif %}
+
+{% endblock %}

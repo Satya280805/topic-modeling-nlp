@@ -1,0 +1,348 @@
+{% extends "topic_app/base.html" %}
+
+{% block title %}LDA Lab — Analyze Text{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════ PAGE HEADER ═══════════ -->
+<div class="page-header">
+  <div class="page-header-eyebrow">// TOPIC MODELING ENGINE</div>
+  <h1>Discover Hidden <span class="accent">Topics</span><br>Inside Any Text</h1>
+  <p class="page-header-sub">
+    Powered by Latent Dirichlet Allocation (LDA). Paste text, upload a file,
+    or point to a URL — the engine extracts latent topics and their defining keywords.
+  </p>
+</div>
+
+<!-- ═══════════ HOW IT WORKS STRIP ═══════════ -->
+<div style="display:flex; gap:0; margin-bottom:2.5rem; overflow:hidden; border:1px solid var(--border-dim); border-radius:var(--radius-lg);">
+  {% for step, icon, label in steps_info %}
+  <div style="flex:1; padding:1rem; border-right:1px solid var(--border-dim); text-align:center; background:var(--bg-panel);">
+    <div style="font-size:1.4rem; margin-bottom:4px;">{{ icon }}</div>
+    <div style="font-family:var(--font-mono); font-size:0.58rem; color:var(--amber); letter-spacing:0.1em; text-transform:uppercase;">STEP {{ step }}</div>
+    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">{{ label }}</div>
+  </div>
+  {% empty %}
+  <!-- Hardcoded fallback -->
+  <div style="flex:1; padding:1rem; border-right:1px solid var(--border-dim); text-align:center; background:var(--bg-panel);">
+    <div style="font-size:1.4rem; margin-bottom:4px;">📥</div>
+    <div style="font-family:var(--font-mono); font-size:0.58rem; color:var(--amber); letter-spacing:0.1em; text-transform:uppercase;">STEP 01</div>
+    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">Input Text</div>
+  </div>
+  <div style="flex:1; padding:1rem; border-right:1px solid var(--border-dim); text-align:center; background:var(--bg-panel);">
+    <div style="font-size:1.4rem; margin-bottom:4px;">🧹</div>
+    <div style="font-family:var(--font-mono); font-size:0.58rem; color:var(--amber); letter-spacing:0.1em; text-transform:uppercase;">STEP 02</div>
+    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">Preprocess & Clean</div>
+  </div>
+  <div style="flex:1; padding:1rem; border-right:1px solid var(--border-dim); text-align:center; background:var(--bg-panel);">
+    <div style="font-size:1.4rem; margin-bottom:4px;">🔢</div>
+    <div style="font-family:var(--font-mono); font-size:0.58rem; color:var(--amber); letter-spacing:0.1em; text-transform:uppercase;">STEP 03</div>
+    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">Vectorise (BoW)</div>
+  </div>
+  <div style="flex:1; padding:1rem; border-right:1px solid var(--border-dim); text-align:center; background:var(--bg-panel);">
+    <div style="font-size:1.4rem; margin-bottom:4px;">🧠</div>
+    <div style="font-family:var(--font-mono); font-size:0.58rem; color:var(--amber); letter-spacing:0.1em; text-transform:uppercase;">STEP 04</div>
+    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">Run LDA Model</div>
+  </div>
+  <div style="flex:1; padding:1rem; text-align:center; background:var(--bg-panel);">
+    <div style="font-size:1.4rem; margin-bottom:4px;">📊</div>
+    <div style="font-family:var(--font-mono); font-size:0.58rem; color:var(--amber); letter-spacing:0.1em; text-transform:uppercase;">STEP 05</div>
+    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">View Topics</div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ═══════════ MAIN FORM ═══════════ -->
+<form method="post" action="{% url 'analyze' %}" enctype="multipart/form-data" id="analyzeForm">
+  {% csrf_token %}
+
+  <div style="display:grid; grid-template-columns: 2fr 1fr; gap:1.5rem; align-items:start;">
+
+    <!-- ── LEFT: Input Card ── -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📥</div>
+        <div>
+          <div class="card-title">Input Source</div>
+          <div class="card-subtitle">Choose how to provide your text corpus</div>
+        </div>
+      </div>
+
+      <!-- Input Type Tabs -->
+      <div class="form-group">
+        <div class="form-label">Input Method <span class="required">*</span></div>
+        <div class="input-type-tabs" id="inputTypeTabs">
+          <div class="input-type-tab">
+            <input type="radio" name="input_type" id="tab_manual" value="manual" checked />
+            <label for="tab_manual">✍️ Paste Text</label>
+          </div>
+          <div class="input-type-tab">
+            <input type="radio" name="input_type" id="tab_txt" value="txt" />
+            <label for="tab_txt">📄 TXT File</label>
+          </div>
+          <div class="input-type-tab">
+            <input type="radio" name="input_type" id="tab_csv" value="csv" />
+            <label for="tab_csv">📊 CSV File</label>
+          </div>
+          <div class="input-type-tab">
+            <input type="radio" name="input_type" id="tab_url" value="url" />
+            <label for="tab_url">🌐 Scrape URL</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MANUAL TEXT ── -->
+      <div class="input-section active" id="section_manual">
+        <div class="form-group">
+          <label class="form-label" for="id_manual_text">
+            Your Text <span class="required">*</span>
+          </label>
+          <textarea
+            class="form-textarea"
+            name="manual_text"
+            id="id_manual_text"
+            rows="10"
+            placeholder="Paste your text here… articles, reviews, reports, research papers — any text works.&#10;&#10;Tip: More text = better topic discovery. Aim for 100+ words."
+          >{{ form.manual_text.value|default:'' }}</textarea>
+          {% if form.manual_text.errors %}
+            <div class="form-error">{{ form.manual_text.errors.0 }}</div>
+          {% endif %}
+          <div style="display:flex; justify-content:flex-end; margin-top:4px;">
+            <span id="wordCount" style="font-family:var(--font-mono); font-size:0.62rem; color:var(--text-muted);">0 words</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TXT FILE ── -->
+      <div class="input-section" id="section_txt">
+        <div class="form-group">
+          <label class="form-label">Upload .txt File <span class="required">*</span></label>
+          <label class="file-drop-zone" for="id_txt_file" id="txtDropZone">
+            <div class="file-drop-icon">📄</div>
+            <div class="file-drop-text">
+              <span>Click to browse</span> or drag & drop your .txt file here
+            </div>
+            <div id="txtFileName" style="margin-top:8px; font-family:var(--font-mono); font-size:0.68rem; color:var(--amber);"></div>
+            <input type="file" name="txt_file" id="id_txt_file" accept=".txt" />
+          </label>
+          {% if form.txt_file.errors %}
+            <div class="form-error">{{ form.txt_file.errors.0 }}</div>
+          {% endif %}
+          <div style="margin-top:8px; font-family:var(--font-mono); font-size:0.65rem; color:var(--text-muted);">
+            Max size: 10MB · The engine extracts paragraphs as separate documents
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CSV FILE ── -->
+      <div class="input-section" id="section_csv">
+        <div class="form-group">
+          <label class="form-label">Upload .csv File <span class="required">*</span></label>
+          <label class="file-drop-zone" for="id_csv_file" id="csvDropZone">
+            <div class="file-drop-icon">📊</div>
+            <div class="file-drop-text">
+              <span>Click to browse</span> or drag & drop your .csv file here
+            </div>
+            <div id="csvFileName" style="margin-top:8px; font-family:var(--font-mono); font-size:0.68rem; color:var(--amber);"></div>
+            <input type="file" name="csv_file" id="id_csv_file" accept=".csv" />
+          </label>
+          {% if form.csv_file.errors %}
+            <div class="form-error">{{ form.csv_file.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_csv_text_column">
+            Column Name Containing Text
+          </label>
+          <input
+            type="text"
+            class="form-input"
+            name="csv_text_column"
+            id="id_csv_text_column"
+            value="{{ form.csv_text_column.value|default:'text' }}"
+            placeholder='e.g.  "text"  or  "review"  or  "body"'
+          />
+          <div style="margin-top:6px; font-family:var(--font-mono); font-size:0.65rem; color:var(--text-muted);">
+            Each CSV row is treated as a separate document. Falls back to first column if not found.
+          </div>
+        </div>
+      </div>
+
+      <!-- ── URL ── -->
+      <div class="input-section" id="section_url">
+        <div class="form-group">
+          <label class="form-label" for="id_scrape_url">
+            Website URL <span class="required">*</span>
+          </label>
+          <input
+            type="url"
+            class="form-input"
+            name="scrape_url"
+            id="id_scrape_url"
+            value="{{ form.scrape_url.value|default:'' }}"
+            placeholder="https://en.wikipedia.org/wiki/Artificial_intelligence"
+          />
+          {% if form.scrape_url.errors %}
+            <div class="form-error">{{ form.scrape_url.errors.0 }}</div>
+          {% endif %}
+          <div style="margin-top:6px; font-family:var(--font-mono); font-size:0.65rem; color:var(--text-muted);">
+            The engine scrapes visible &lt;p&gt; tags. Works best with news articles, Wikipedia, blogs.
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end left card -->
+
+    <!-- ── RIGHT: Parameters Card ── -->
+    <div style="display:flex; flex-direction:column; gap:1.25rem;">
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">⚙️</div>
+          <div>
+            <div class="card-title">LDA Parameters</div>
+            <div class="card-subtitle">Tune the model</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="id_num_topics">
+            Number of Topics
+            <span style="color:var(--amber); margin-left:4px;" id="topicsDisplay">5</span>
+          </label>
+          <input
+            type="range"
+            id="num_topics_slider"
+            min="2" max="20" value="{{ form.num_topics.value|default:5 }}"
+            style="width:100%; accent-color:var(--amber); cursor:pointer;"
+          />
+          <input type="hidden" name="num_topics" id="id_num_topics" value="{{ form.num_topics.value|default:5 }}" />
+          <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:0.6rem; color:var(--text-muted); margin-top:2px;">
+            <span>2</span><span>20</span>
+          </div>
+          {% if form.num_topics.errors %}
+            <div class="form-error">{{ form.num_topics.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="id_num_words">
+            Words per Topic
+            <span style="color:var(--amber); margin-left:4px;" id="wordsDisplay">10</span>
+          </label>
+          <input
+            type="range"
+            id="num_words_slider"
+            min="5" max="20" value="{{ form.num_words.value|default:10 }}"
+            style="width:100%; accent-color:var(--amber); cursor:pointer;"
+          />
+          <input type="hidden" name="num_words" id="id_num_words" value="{{ form.num_words.value|default:10 }}" />
+          <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:0.6rem; color:var(--text-muted); margin-top:2px;">
+            <span>5</span><span>20</span>
+          </div>
+        </div>
+
+        <!-- Parameter explanation -->
+        <div style="padding:10px; background:var(--bg-panel); border-radius:var(--radius); border:1px solid var(--border-dim);">
+          <div style="font-family:var(--font-mono); font-size:0.62rem; color:var(--text-muted); line-height:1.7;">
+            <div><span style="color:var(--amber);">K (topics)</span> — Number of latent topics LDA will discover</div>
+            <div><span style="color:var(--amber);">N (words)</span> — Top keywords shown per topic</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="btn btn-primary btn-analyze">
+        <span>⬡</span> Run LDA Analysis
+      </button>
+
+      <!-- Quick tips -->
+      <div class="card" style="padding:1.25rem;">
+        <div style="font-family:var(--font-mono); font-size:0.62rem; color:var(--text-muted); line-height:1.9;">
+          <div style="color:var(--amber); margin-bottom:6px; letter-spacing:0.08em;">// TIPS</div>
+          <div>→ Use 3–7 topics for short texts</div>
+          <div>→ Use 5–15 topics for large corpora</div>
+          <div>→ More documents = better results</div>
+          <div>→ CSV mode works best for reviews</div>
+          <div>→ Wikipedia URLs give clean text</div>
+        </div>
+      </div>
+
+    </div><!-- end right -->
+  </div><!-- end grid -->
+
+</form>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script>
+  // ── Input type tab switching ──────────────────────────────────────────────
+  const radios   = document.querySelectorAll('input[name="input_type"]');
+  const sections = {
+    manual: document.getElementById('section_manual'),
+    txt:    document.getElementById('section_txt'),
+    csv:    document.getElementById('section_csv'),
+    url:    document.getElementById('section_url'),
+  };
+
+  function switchSection(val) {
+    Object.values(sections).forEach(s => s && s.classList.remove('active'));
+    if (sections[val]) sections[val].classList.add('active');
+  }
+
+  radios.forEach(radio => {
+    radio.addEventListener('change', () => switchSection(radio.value));
+  });
+
+  // Init to pre-selected value (handles back-button / validation re-render)
+  const checked = document.querySelector('input[name="input_type"]:checked');
+  if (checked) switchSection(checked.value);
+
+  // ── Word counter ─────────────────────────────────────────────────────────
+  const textarea  = document.getElementById('id_manual_text');
+  const wordCount = document.getElementById('wordCount');
+
+  function updateWordCount() {
+    const words = textarea.value.trim().split(/\s+/).filter(w => w).length;
+    wordCount.textContent = words + ' word' + (words !== 1 ? 's' : '');
+    wordCount.style.color = words < 20 ? 'var(--red)' : words < 50 ? 'var(--amber)' : 'var(--green)';
+  }
+
+  if (textarea) {
+    textarea.addEventListener('input', updateWordCount);
+    updateWordCount();
+  }
+
+  // ── Sliders ───────────────────────────────────────────────────────────────
+  const topicsSlider  = document.getElementById('num_topics_slider');
+  const topicsInput   = document.getElementById('id_num_topics');
+  const topicsDisplay = document.getElementById('topicsDisplay');
+
+  const wordsSlider   = document.getElementById('num_words_slider');
+  const wordsInput    = document.getElementById('id_num_words');
+  const wordsDisplay  = document.getElementById('wordsDisplay');
+
+  topicsSlider.addEventListener('input', () => {
+    topicsInput.value   = topicsSlider.value;
+    topicsDisplay.textContent = topicsSlider.value;
+  });
+
+  wordsSlider.addEventListener('input', () => {
+    wordsInput.value  = wordsSlider.value;
+    wordsDisplay.textContent = wordsSlider.value;
+  });
+
+  // ── File name display ─────────────────────────────────────────────────────
+  document.getElementById('id_txt_file').addEventListener('change', function() {
+    document.getElementById('txtFileName').textContent =
+      this.files[0] ? '✓ ' + this.files[0].name : '';
+  });
+
+  document.getElementById('id_csv_file').addEventListener('change', function() {
+    document.getElementById('csvFileName').textContent =
+      this.files[0] ? '✓ ' + this.files[0].name : '';
+  });
+</script>
+{% endblock %}

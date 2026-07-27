@@ -1,0 +1,318 @@
+{% extends "topic_app/base.html" %}
+
+{% block title %}LDA Lab — Results #{{ analysis.pk }}{% endblock %}
+
+{% block content %}
+
+<!-- ══════════ PAGE HEADER ══════════ -->
+<div class="page-header">
+  <div class="page-header-eyebrow">// ANALYSIS #{{ analysis.pk }} · {{ analysis.created_at|date:"Y-m-d H:i" }}</div>
+  <h1>Topic <span class="accent">Discovery</span> Results</h1>
+  <p class="page-header-sub">
+    LDA identified <strong style="color:var(--accent);">{{ results.actual_topics }} latent topics</strong>
+    from {{ num_docs }} document(s).
+    {% if perplexity %}Perplexity: <span style="color:var(--accent); font-family:var(--font-mono); font-weight:700;">{{ perplexity }}</span>.{% endif %}
+  </p>
+</div>
+
+<!-- ══════════ STAT GRID ══════════ -->
+<div class="stat-grid" style="margin-bottom:2rem;">
+  <div class="stat-item">
+    <span class="stat-value">{{ results.actual_topics }}</span>
+    <span class="stat-label">Topics Found</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-value">{{ num_docs }}</span>
+    <span class="stat-label">Documents</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-value">{{ vocabulary_size }}</span>
+    <span class="stat-label">Vocabulary</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-value">{{ analysis.num_words }}</span>
+    <span class="stat-label">Words / Topic</span>
+  </div>
+  {% if perplexity %}
+  <div class="stat-item">
+    <span class="stat-value" style="font-size:1.4rem;">{{ perplexity }}</span>
+    <span class="stat-label">Perplexity ↓ better</span>
+  </div>
+  {% endif %}
+  <div class="stat-item">
+    <span class="stat-value" style="font-size:1.4rem;">
+      {% if analysis.input_type == 'manual' %}✍️
+      {% elif analysis.input_type == 'txt' %}📄
+      {% elif analysis.input_type == 'csv' %}📊
+      {% elif analysis.input_type == 'url' %}🌐{% endif %}
+    </span>
+    <span class="stat-label">{{ analysis.get_input_type_display }}</span>
+  </div>
+</div>
+
+<!-- ══════════ WORD SCORE LEGEND ══════════ -->
+<div style="background:var(--bg-card); border:1px solid var(--border-dim); border-left:3px solid var(--accent); border-radius:var(--radius-lg); padding:1rem 1.4rem; margin-bottom:1.75rem; box-shadow:var(--shadow-card); display:flex; flex-wrap:wrap; gap:1rem; align-items:center;">
+  <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--text-muted); letter-spacing:0.08em; text-transform:uppercase; margin-right:0.5rem;">Word Score Guide:</div>
+  <div style="display:flex; flex-wrap:wrap; gap:0.6rem;">
+    <span style="font-family:var(--font-mono); font-size:0.7rem; background:rgba(37,99,235,0.12); color:#1e3a8a; border:1px solid rgba(37,99,235,0.3); border-radius:4px; padding:3px 10px;">
+      ≥ 0.04 &nbsp;<strong>Very Strong</strong>
+    </span>
+    <span style="font-family:var(--font-mono); font-size:0.7rem; background:rgba(5,150,105,0.10); color:#065f46; border:1px solid rgba(5,150,105,0.3); border-radius:4px; padding:3px 10px;">
+      0.02–0.04 &nbsp;<strong>Moderate</strong>
+    </span>
+    <span style="font-family:var(--font-mono); font-size:0.7rem; background:rgba(217,119,6,0.10); color:#78350f; border:1px solid rgba(217,119,6,0.3); border-radius:4px; padding:3px 10px;">
+      0.01–0.02 &nbsp;<strong>Weak</strong>
+    </span>
+    <span style="font-family:var(--font-mono); font-size:0.7rem; background:rgba(100,116,139,0.10); color:#334155; border:1px solid rgba(100,116,139,0.25); border-radius:4px; padding:3px 10px;">
+      &lt; 0.01 &nbsp;<strong>Minor</strong>
+    </span>
+  </div>
+  <div style="font-family:var(--font-mono); font-size:0.63rem; color:var(--text-muted); margin-left:auto;">
+    Score = normalised word-topic probability
+  </div>
+</div>
+
+<!-- ══════════ TOPICS GRID ══════════ -->
+<div class="card" style="margin-bottom:2rem;">
+  <div class="card-header">
+    <div class="card-icon">🧠</div>
+    <div>
+      <div class="card-title">Discovered Topics</div>
+      <div class="card-subtitle">Keywords ranked by weight score · higher score = more representative</div>
+    </div>
+  </div>
+
+  <div class="topics-grid">
+    {% for topic in topics %}
+    <div class="topic-card" style="
+      {% cycle 'border-top:3px solid #2563eb;' 'border-top:3px solid #059669;' 'border-top:3px solid #7c3aed;' 'border-top:3px solid #d97706;' 'border-top:3px solid #dc2626;' %}
+    ">
+      <div class="topic-card-num">{{ topic.id }}</div>
+      <div class="topic-label">⬡ {{ topic.label }}</div>
+
+      <div class="word-pills">
+        {% for word, weight in topic.word_weight_pairs %}
+        <div class="word-pill" style="
+          {% if weight >= 0.04 %}
+            background:rgba(37,99,235,0.10); border-color:rgba(37,99,235,0.40); color:#1e3a8a;
+          {% elif weight >= 0.02 %}
+            background:rgba(5,150,105,0.09); border-color:rgba(5,150,105,0.35); color:#065f46;
+          {% elif weight >= 0.01 %}
+            background:rgba(217,119,6,0.09); border-color:rgba(217,119,6,0.30); color:#78350f;
+          {% else %}
+            background:rgba(100,116,139,0.08); border-color:rgba(100,116,139,0.22); color:#475569;
+          {% endif %}
+          font-size:{% if forloop.counter == 1 %}0.82rem{% elif forloop.counter <= 3 %}0.76rem{% else %}0.71rem{% endif %};
+        ">
+          {{ word }}
+          <span class="word-weight">{{ weight }}</span>
+        </div>
+        {% endfor %}
+      </div>
+
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ══════════ CHARTS ══════════ -->
+<div style="display:grid; grid-template-columns:2fr 1fr; gap:1.5rem; margin-bottom:2rem;">
+
+  <!-- Bar Chart -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">📊</div>
+      <div>
+        <div class="card-title">Word Weight Bar Chart</div>
+        <div class="card-subtitle">Top 8 keyword scores for selected topic · click buttons to switch</div>
+      </div>
+    </div>
+
+    <!-- Topic selector -->
+    <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:1rem;" id="topicSelector">
+      {% for topic in topics %}
+      <button
+        class="btn btn-ghost btn-sm topic-btn {% if forloop.first %}active-btn{% endif %}"
+        data-idx="{{ forloop.counter0 }}"
+        style="{% if forloop.first %}color:var(--accent); border-color:var(--border); background:var(--accent-trace); font-weight:700;{% endif %}"
+      >{{ topic.label }}</button>
+      {% endfor %}
+    </div>
+
+    <!-- Chart explanation strip -->
+    <div style="background:var(--bg-panel); border:1px solid var(--border-dim); border-radius:var(--radius); padding:8px 12px; margin-bottom:1rem; font-family:var(--font-mono); font-size:0.62rem; color:var(--text-muted); line-height:1.8;">
+      <strong style="color:var(--text-primary);">How to read:</strong>
+      Each bar = one keyword. Longer bar = higher score = word is more central to this topic.
+      Hover bar for exact score. Bars are normalised probabilities from LDA's topic-word matrix.
+    </div>
+
+    <canvas id="barChart" height="240"></canvas>
+  </div>
+
+  <!-- Doughnut Chart -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🍩</div>
+      <div>
+        <div class="card-title">Document Distribution</div>
+        <div class="card-subtitle">Dominant topic per document</div>
+      </div>
+    </div>
+
+    <!-- Chart explanation strip -->
+    <div style="background:var(--bg-panel); border:1px solid var(--border-dim); border-radius:var(--radius); padding:8px 12px; margin-bottom:1rem; font-family:var(--font-mono); font-size:0.62rem; color:var(--text-muted); line-height:1.8;">
+      <strong style="color:var(--text-primary);">How to read:</strong>
+      Each slice = one topic. Slice size = how many docs are primarily about that topic.
+      Hover for exact count. Larger slice = topic dominates more documents.
+    </div>
+
+    <canvas id="pieChart" height="260"></canvas>
+  </div>
+</div>
+
+<!-- ══════════ SOURCE URL ══════════ -->
+{% if analysis.source_url %}
+<div class="card" style="margin-bottom:2rem;">
+  <div class="card-header">
+    <div class="card-icon">🌐</div>
+    <div><div class="card-title">Source URL</div><div class="card-subtitle">Scraped page</div></div>
+  </div>
+  <a href="{{ analysis.source_url }}" target="_blank"
+     style="font-family:var(--font-mono); font-size:0.78rem; color:var(--accent); word-break:break-all;">
+    {{ analysis.source_url }}
+  </a>
+</div>
+{% endif %}
+
+<!-- ══════════ ACTIONS ══════════ -->
+<div style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+  <a href="{% url 'home' %}" class="btn btn-primary">⬡ New Analysis</a>
+  <a href="{% url 'history' %}" class="btn btn-ghost">// View History</a>
+  <a href="{% url 'about' %}" class="btn btn-ghost">// About Charts</a>
+  <form method="post" action="{% url 'delete_analysis' analysis.pk %}"
+        style="margin-left:auto;"
+        onsubmit="return confirm('Delete this analysis permanently?')">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger btn-sm">✗ Delete</button>
+  </form>
+</div>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script>
+  // ── Light-mode Chart.js defaults ─────────────────────────────────────────
+  Chart.defaults.color          = '#64748b';
+  Chart.defaults.borderColor    = 'rgba(15,23,42,0.08)';
+  Chart.defaults.font.family    = "'Space Mono', monospace";
+  Chart.defaults.font.size      = 11;
+
+  const COLORS = [
+    'rgba(37,99,235,0.75)',
+    'rgba(5,150,105,0.75)',
+    'rgba(124,58,237,0.75)',
+    'rgba(217,119,6,0.75)',
+    'rgba(220,38,38,0.75)',
+    'rgba(14,165,233,0.75)',
+    'rgba(236,72,153,0.75)',
+    'rgba(20,184,166,0.75)',
+  ];
+  const BORDERS = COLORS.map(c => c.replace('0.75', '1'));
+
+  // ── Bar Chart ─────────────────────────────────────────────────────────────
+  const chartData = {{ chart_data_json|safe }};
+  const barCtx    = document.getElementById('barChart').getContext('2d');
+
+  function buildBarChart(idx) {
+    const d = chartData[idx];
+    return new Chart(barCtx, {
+      type: 'bar',
+      data: {
+        labels: d.words,
+        datasets: [{
+          label: d.label + ' — Word Scores',
+          data:  d.weights,
+          backgroundColor: COLORS[idx % COLORS.length],
+          borderColor:     BORDERS[idx % COLORS.length],
+          borderWidth: 1,
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => ` score: ${ctx.raw.toFixed(4)}  — ${ctx.raw >= 0.04 ? 'Very Strong' : ctx.raw >= 0.02 ? 'Moderate' : ctx.raw >= 0.01 ? 'Weak' : 'Minor'}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid:  { color: 'rgba(15,23,42,0.05)' },
+            ticks: { color: '#94a3b8', callback: v => v.toFixed(4) },
+            title: { display: true, text: 'Normalised Word-Topic Probability (Score)', color: '#94a3b8', font: { size: 10 } }
+          },
+          y: {
+            grid:  { display: false },
+            ticks: { color: '#0f172a', font: { size: 12, weight: 'bold' } }
+          }
+        }
+      }
+    });
+  }
+
+  let barChart = buildBarChart(0);
+
+  document.querySelectorAll('.topic-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.topic-btn').forEach(b => {
+        b.style.color = ''; b.style.borderColor = ''; b.style.background = ''; b.style.fontWeight = '';
+      });
+      btn.style.color = 'var(--accent)';
+      btn.style.borderColor = 'var(--border)';
+      btn.style.background = 'var(--accent-trace)';
+      btn.style.fontWeight = '700';
+      barChart.destroy();
+      barChart = buildBarChart(parseInt(btn.dataset.idx));
+    });
+  });
+
+  // ── Doughnut Chart ────────────────────────────────────────────────────────
+  const pieLabels = {{ pie_labels_json|safe }};
+  const pieValues = {{ pie_values_json|safe }};
+  const pieCtx    = document.getElementById('pieChart').getContext('2d');
+
+  new Chart(pieCtx, {
+    type: 'doughnut',
+    data: {
+      labels: pieLabels,
+      datasets: [{
+        data:            pieValues,
+        backgroundColor: COLORS.slice(0, pieLabels.length),
+        borderColor:     '#ffffff',
+        borderWidth:     3,
+        hoverOffset:     8,
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '60%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { padding: 14, boxWidth: 13, color: '#475569' }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.label}: ${ctx.raw} doc(s) — ${Math.round(ctx.raw / pieValues.reduce((a,b)=>a+b,0) * 100)}%`
+          }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

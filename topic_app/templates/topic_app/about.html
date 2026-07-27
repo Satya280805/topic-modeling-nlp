@@ -1,0 +1,339 @@
+{% extends "topic_app/base.html" %}
+
+{% block title %}LDA Lab — About{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-eyebrow">// DOCUMENTATION</div>
+  <h1>About <span class="accent">LDA Lab</span></h1>
+  <p class="page-header-sub">How it works, what's under the hood, and why it matters.</p>
+</div>
+
+<div style="display:grid; grid-template-columns:2fr 1fr; gap:1.5rem; align-items:start;">
+
+  <!-- ══════════ LEFT COLUMN ══════════ -->
+  <div style="display:flex; flex-direction:column; gap:1.25rem;">
+
+    <!-- What is Topic Modeling -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🧠</div>
+        <div>
+          <div class="card-title">What is Topic Modeling?</div>
+          <div class="card-subtitle">Unsupervised NLP technique</div>
+        </div>
+      </div>
+      <p style="color:var(--text-secondary); font-size:0.88rem; line-height:1.8; margin-bottom:1rem;">
+        Topic modeling is an <strong style="color:var(--text-primary);">unsupervised machine learning</strong>
+        technique that automatically discovers hidden thematic structure in large collections of text.
+        Unlike classification, you do not need labelled data — the algorithm finds patterns on its own.
+      </p>
+      <p style="color:var(--text-secondary); font-size:0.88rem; line-height:1.8;">
+        It is used in news aggregation, academic research, customer feedback analysis, social media
+        monitoring, legal document discovery, and much more.
+      </p>
+    </div>
+
+    <!-- LDA Explanation -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📐</div>
+        <div>
+          <div class="card-title">Latent Dirichlet Allocation (LDA)</div>
+          <div class="card-subtitle">Probabilistic generative model · Blei et al. 2003</div>
+        </div>
+      </div>
+      <p style="color:var(--text-secondary); font-size:0.88rem; line-height:1.8; margin-bottom:1rem;">
+        LDA is a <strong style="color:var(--text-primary);">probabilistic generative model</strong>.
+        It assumes documents are written by first picking a mixture of topics, then picking words
+        from those topics. LDA reverses this process to infer topics from observed words.
+      </p>
+      <div style="background:var(--bg-panel); border:1px solid var(--border-dim); border-left:3px solid var(--accent); border-radius:var(--radius); padding:1rem; margin-bottom:1rem;">
+        <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-secondary); line-height:2.2;">
+          <div><span style="color:var(--accent); font-weight:700;">Assumption 1:</span> Each document is a <em>mixture of K topics</em></div>
+          <div><span style="color:var(--accent); font-weight:700;">Assumption 2:</span> Each topic is a <em>distribution over vocabulary</em></div>
+          <div><span style="color:var(--accent); font-weight:700;">Goal:</span> Given observed documents — infer topics + per-doc mixtures</div>
+          <div><span style="color:var(--accent); font-weight:700;">Method:</span> Variational Bayes EM algorithm (online variant, sklearn)</div>
+        </div>
+      </div>
+      <p style="color:var(--text-secondary); font-size:0.88rem; line-height:1.8;">
+        LDA uses <strong style="color:var(--text-primary);">Dirichlet priors</strong> (alpha and beta) to control
+        how focused or spread-out topic mixtures and word distributions are.
+        Lower alpha = sparser topic mixtures. Lower beta = more focused topics.
+      </p>
+    </div>
+
+    <!-- Processing Pipeline — 100% static HTML, no Django loop, no risky filters -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🔁</div>
+        <div>
+          <div class="card-title">Processing Pipeline</div>
+          <div class="card-subtitle">Step-by-step flow inside nlp_engine.py</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--border-dim);">
+        <div style="width:30px; height:30px; min-width:30px; background:var(--accent-trace); border:1px solid var(--border); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:0.6rem; color:var(--accent); font-weight:700; flex-shrink:0;">01</div>
+        <div>
+          <div style="font-family:var(--font-display); font-size:0.85rem; font-weight:700; color:var(--text-primary);">Text Extraction</div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:3px;">Extract raw text from paste / .txt upload / .csv upload / URL scrape (BeautifulSoup)</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--border-dim);">
+        <div style="width:30px; height:30px; min-width:30px; background:var(--accent-trace); border:1px solid var(--border); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:0.6rem; color:var(--accent); font-weight:700; flex-shrink:0;">02</div>
+        <div>
+          <div style="font-family:var(--font-display); font-size:0.85rem; font-weight:700; color:var(--text-primary);">Preprocessing</div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:3px;">Lowercase, strip URLs/punctuation, remove stopwords, WordNetLemmatizer (NLTK)</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--border-dim);">
+        <div style="width:30px; height:30px; min-width:30px; background:var(--accent-trace); border:1px solid var(--border); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:0.6rem; color:var(--accent); font-weight:700; flex-shrink:0;">03</div>
+        <div>
+          <div style="font-family:var(--font-display); font-size:0.85rem; font-weight:700; color:var(--text-primary);">Vectorisation</div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:3px;">CountVectorizer builds Document-Term Matrix (Bag-of-Words model, top 1000 features)</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--border-dim);">
+        <div style="width:30px; height:30px; min-width:30px; background:var(--accent-trace); border:1px solid var(--border); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:0.6rem; color:var(--accent); font-weight:700; flex-shrink:0;">04</div>
+        <div>
+          <div style="font-family:var(--font-display); font-size:0.85rem; font-weight:700; color:var(--text-primary);">LDA Training</div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:3px;">LatentDirichletAllocation fits the DTM via online variational Bayes (scikit-learn)</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:12px; padding:12px 0;">
+        <div style="width:30px; height:30px; min-width:30px; background:var(--accent-trace); border:1px solid var(--border); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:0.6rem; color:var(--accent); font-weight:700; flex-shrink:0;">05</div>
+        <div>
+          <div style="font-family:var(--font-display); font-size:0.85rem; font-weight:700; color:var(--text-primary);">Result Extraction</div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:3px;">argsort() extracts top-N keywords + scores per topic. argmax() assigns each doc its dominant topic.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart 1 Explanation -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📊</div>
+        <div>
+          <div class="card-title">Chart 1 — Horizontal Bar Chart</div>
+          <div class="card-subtitle">Word Weight Scores per Topic</div>
+        </div>
+      </div>
+
+      <p style="color:var(--text-secondary); font-size:0.88rem; line-height:1.8; margin-bottom:1rem;">
+        This chart shows the <strong style="color:var(--text-primary);">top 8 keywords</strong> for whichever
+        topic you select, with each horizontal bar representing that word's
+        <strong style="color:var(--text-primary);">normalised weight score</strong> — how strongly
+        that word defines the topic.
+      </p>
+
+      <!-- Static visual mock -->
+      <div style="background:var(--bg-panel); border:1px solid var(--border-dim); border-radius:var(--radius); padding:1rem; margin-bottom:1rem;">
+        <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--text-muted); margin-bottom:10px; letter-spacing:0.06em; text-transform:uppercase;">Example — Topic 1 (Climate)</div>
+
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:7px;">
+          <div style="width:72px; font-family:var(--font-mono); font-size:0.68rem; color:var(--text-primary); text-align:right; flex-shrink:0;">climate</div>
+          <div style="flex:1; background:var(--border-dim); border-radius:3px; height:14px;"><div style="height:100%; width:90%; background:rgba(37,99,235,0.72); border-radius:3px;"></div></div>
+          <div style="font-family:var(--font-mono); font-size:0.62rem; color:#1e3a8a; font-weight:700; width:48px;">0.0412</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:7px;">
+          <div style="width:72px; font-family:var(--font-mono); font-size:0.68rem; color:var(--text-primary); text-align:right; flex-shrink:0;">energy</div>
+          <div style="flex:1; background:var(--border-dim); border-radius:3px; height:14px;"><div style="height:100%; width:68%; background:rgba(37,99,235,0.72); border-radius:3px;"></div></div>
+          <div style="font-family:var(--font-mono); font-size:0.62rem; color:#065f46; font-weight:700; width:48px;">0.0310</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:7px;">
+          <div style="width:72px; font-family:var(--font-mono); font-size:0.68rem; color:var(--text-primary); text-align:right; flex-shrink:0;">emission</div>
+          <div style="flex:1; background:var(--border-dim); border-radius:3px; height:14px;"><div style="height:100%; width:55%; background:rgba(37,99,235,0.72); border-radius:3px;"></div></div>
+          <div style="font-family:var(--font-mono); font-size:0.62rem; color:#065f46; font-weight:700; width:48px;">0.0251</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:7px;">
+          <div style="width:72px; font-family:var(--font-mono); font-size:0.68rem; color:var(--text-primary); text-align:right; flex-shrink:0;">global</div>
+          <div style="flex:1; background:var(--border-dim); border-radius:3px; height:14px;"><div style="height:100%; width:43%; background:rgba(37,99,235,0.72); border-radius:3px;"></div></div>
+          <div style="font-family:var(--font-mono); font-size:0.62rem; color:#78350f; font-weight:700; width:48px;">0.0196</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="width:72px; font-family:var(--font-mono); font-size:0.68rem; color:var(--text-primary); text-align:right; flex-shrink:0;">warming</div>
+          <div style="flex:1; background:var(--border-dim); border-radius:3px; height:14px;"><div style="height:100%; width:35%; background:rgba(37,99,235,0.72); border-radius:3px;"></div></div>
+          <div style="font-family:var(--font-mono); font-size:0.62rem; color:#78350f; font-weight:700; width:48px;">0.0160</div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg-panel); border:1px solid var(--border-dim); border-radius:var(--radius); padding:0.85rem; margin-bottom:0.75rem;">
+        <div style="font-family:var(--font-mono); font-size:0.68rem; color:var(--text-secondary); line-height:2.1;">
+          <div>→ <strong style="color:var(--text-primary);">Longer bar + higher score</strong> = word is more central to the topic</div>
+          <div>→ <strong style="color:var(--text-primary);">Scores are probabilities</strong> — sum to approx. 1 across all vocabulary for that topic</div>
+          <div>→ <strong style="color:var(--accent);">Click Topic buttons</strong> above the chart to switch between topics</div>
+          <div>→ <strong style="color:var(--accent);">Hover any bar</strong> to see score + strength label in tooltip</div>
+        </div>
+      </div>
+
+      <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.7;">
+        <strong style="color:var(--text-primary);">Reading example:</strong> "climate" at 0.0412 vs "energy" at 0.0289
+        means climate is ~43% more strongly associated with this topic. Any score above 0.04 is a very strong signal.
+      </p>
+    </div>
+
+    <!-- Chart 2 Explanation -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🍩</div>
+        <div>
+          <div class="card-title">Chart 2 — Doughnut Chart</div>
+          <div class="card-subtitle">Document Distribution Across Topics</div>
+        </div>
+      </div>
+
+      <p style="color:var(--text-secondary); font-size:0.88rem; line-height:1.8; margin-bottom:1rem;">
+        This chart shows <strong style="color:var(--text-primary);">how many documents are dominated
+        by each topic</strong>. LDA assigns every document a probability for every topic — the topic
+        with the <strong style="color:var(--text-primary);">highest probability</strong> is that
+        document's <em>dominant topic</em>. This chart counts and visualises those assignments.
+      </p>
+
+      <!-- Static visual mock -->
+      <div style="background:var(--bg-panel); border:1px solid var(--border-dim); border-radius:var(--radius); padding:1rem; margin-bottom:1rem;">
+        <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--text-muted); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.06em;">Example — 15 CSV reviews, 3 topics</div>
+        <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+          <div style="flex:1; min-width:100px;">
+            <div style="height:22px; border-radius:4px; overflow:hidden; display:flex; gap:1px;">
+              <div style="width:53%; background:rgba(37,99,235,0.75);"></div>
+              <div style="width:33%; background:rgba(5,150,105,0.75);"></div>
+              <div style="width:14%; background:rgba(124,58,237,0.75);"></div>
+            </div>
+          </div>
+          <div style="font-family:var(--font-mono); font-size:0.68rem; color:var(--text-secondary); line-height:2.1;">
+            <div><span style="display:inline-block; width:10px; height:10px; background:rgba(37,99,235,0.75); border-radius:2px; margin-right:6px; vertical-align:middle;"></span>Topic 1 — 8 docs (53%)</div>
+            <div><span style="display:inline-block; width:10px; height:10px; background:rgba(5,150,105,0.75); border-radius:2px; margin-right:6px; vertical-align:middle;"></span>Topic 2 — 5 docs (33%)</div>
+            <div><span style="display:inline-block; width:10px; height:10px; background:rgba(124,58,237,0.75); border-radius:2px; margin-right:6px; vertical-align:middle;"></span>Topic 3 — 2 docs (14%)</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg-panel); border:1px solid var(--border-dim); border-radius:var(--radius); padding:0.85rem; margin-bottom:0.75rem;">
+        <div style="font-family:var(--font-mono); font-size:0.68rem; color:var(--text-secondary); line-height:2.1;">
+          <div>→ <strong style="color:var(--text-primary);">Larger slice</strong> = more documents are primarily about that topic</div>
+          <div>→ <strong style="color:var(--text-primary);">Smaller slice</strong> = fewer documents belong to that topic</div>
+          <div>→ <strong style="color:var(--text-primary);">Equal slices</strong> = topics are evenly balanced across your corpus</div>
+          <div>→ <strong style="color:var(--accent);">Hover any slice</strong> to see exact doc count + percentage in tooltip</div>
+        </div>
+      </div>
+
+      <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.7;">
+        <strong style="color:var(--text-primary);">Reading example:</strong> If you upload 15 product reviews
+        and Topic 1 (quality issues) gets 8 docs while Topic 2 (positive praise) gets 7,
+        the chart shows 53% vs 47% — most reviews discuss quality problems.
+      </p>
+    </div>
+
+  </div><!-- end left -->
+
+  <!-- ══════════ RIGHT COLUMN ══════════ -->
+  <div style="display:flex; flex-direction:column; gap:1.25rem;">
+
+    <!-- Tech Stack — 100% static, no risky template loops -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🛠️</div>
+        <div>
+          <div class="card-title">Tech Stack</div>
+          <div class="card-subtitle">Libraries used</div>
+        </div>
+      </div>
+
+      <div style="padding:9px 0; border-bottom:1px solid var(--border-dim); display:flex; justify-content:space-between; align-items:center;">
+        <div><div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-primary); font-weight:700;">Django</div><div style="font-size:0.67rem; color:var(--text-muted);">Web framework — views, ORM, templates</div></div>
+        <span class="badge badge-blue">4.x</span>
+      </div>
+      <div style="padding:9px 0; border-bottom:1px solid var(--border-dim); display:flex; justify-content:space-between; align-items:center;">
+        <div><div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-primary); font-weight:700;">scikit-learn</div><div style="font-size:0.67rem; color:var(--text-muted);">LDA model + CountVectorizer</div></div>
+        <span class="badge badge-blue">1.x</span>
+      </div>
+      <div style="padding:9px 0; border-bottom:1px solid var(--border-dim); display:flex; justify-content:space-between; align-items:center;">
+        <div><div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-primary); font-weight:700;">NLTK</div><div style="font-size:0.67rem; color:var(--text-muted);">Tokenisation, stopwords, lemmatiser</div></div>
+        <span class="badge badge-blue">3.x</span>
+      </div>
+      <div style="padding:9px 0; border-bottom:1px solid var(--border-dim); display:flex; justify-content:space-between; align-items:center;">
+        <div><div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-primary); font-weight:700;">BeautifulSoup4</div><div style="font-size:0.67rem; color:var(--text-muted);">HTML parsing for URL scraping</div></div>
+        <span class="badge badge-blue">4.x</span>
+      </div>
+      <div style="padding:9px 0; border-bottom:1px solid var(--border-dim); display:flex; justify-content:space-between; align-items:center;">
+        <div><div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-primary); font-weight:700;">requests</div><div style="font-size:0.67rem; color:var(--text-muted);">HTTP client for URL fetching</div></div>
+        <span class="badge badge-blue">2.x</span>
+      </div>
+      <div style="padding:9px 0; border-bottom:1px solid var(--border-dim); display:flex; justify-content:space-between; align-items:center;">
+        <div><div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-primary); font-weight:700;">numpy</div><div style="font-size:0.67rem; color:var(--text-muted);">Matrix ops on topic-word arrays</div></div>
+        <span class="badge badge-blue">1.x</span>
+      </div>
+      <div style="padding:9px 0; border-bottom:1px solid var(--border-dim); display:flex; justify-content:space-between; align-items:center;">
+        <div><div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-primary); font-weight:700;">Chart.js</div><div style="font-size:0.67rem; color:var(--text-muted);">Bar + doughnut charts (CDN)</div></div>
+        <span class="badge badge-blue">4.x</span>
+      </div>
+      <div style="padding:9px 0; display:flex; justify-content:space-between; align-items:center;">
+        <div><div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-primary); font-weight:700;">SQLite</div><div style="font-size:0.67rem; color:var(--text-muted);">Built-in Django database</div></div>
+        <span class="badge badge-blue">built-in</span>
+      </div>
+    </div>
+
+    <!-- Word Scores Guide -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🔢</div>
+        <div>
+          <div class="card-title">What Are Word Scores?</div>
+          <div class="card-subtitle">Reading the weight numbers</div>
+        </div>
+      </div>
+      <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.8; margin-bottom:0.75rem;">
+        Every keyword on a topic card shows a small score next to it —
+        e.g. <strong style="font-family:var(--font-mono); color:var(--text-primary);">climate 0.0412</strong>.
+        This is the <strong style="color:var(--text-primary);">normalised word-topic probability</strong>
+        from LDA's component matrix — how strongly that word defines the topic.
+      </p>
+      <div style="background:var(--bg-panel); border:1px solid var(--border-dim); border-radius:var(--radius); padding:0.85rem; margin-bottom:0.75rem;">
+        <div style="font-family:var(--font-mono); font-size:0.68rem; line-height:2.3;">
+          <div><span style="color:#1e3a8a; font-weight:700; background:rgba(37,99,235,0.12); padding:2px 7px; border-radius:3px; display:inline-block; min-width:72px; text-align:center; margin-right:8px;">0.04+</span>Very Strong signal</div>
+          <div><span style="color:#065f46; font-weight:700; background:rgba(5,150,105,0.10); padding:2px 7px; border-radius:3px; display:inline-block; min-width:72px; text-align:center; margin-right:8px;">0.02-0.04</span>Moderate signal</div>
+          <div><span style="color:#78350f; font-weight:700; background:rgba(217,119,6,0.10); padding:2px 7px; border-radius:3px; display:inline-block; min-width:72px; text-align:center; margin-right:8px;">0.01-0.02</span>Weak signal</div>
+          <div><span style="color:#334155; font-weight:700; background:rgba(100,116,139,0.10); padding:2px 7px; border-radius:3px; display:inline-block; min-width:72px; text-align:center; margin-right:8px;">below 0.01</span>Minor / background</div>
+        </div>
+      </div>
+      <p style="font-size:0.78rem; color:var(--text-muted); line-height:1.7;">
+        Computed as: word's raw LDA weight divided by total weights in that topic.
+        Higher score = word appears more frequently and distinctively in documents belonging to that topic.
+      </p>
+    </div>
+
+    <!-- Interpret Results -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">💡</div>
+        <div>
+          <div class="card-title">Interpreting Results</div>
+          <div class="card-subtitle">What to look for</div>
+        </div>
+      </div>
+      <div style="font-family:var(--font-mono); font-size:0.68rem; color:var(--text-secondary); line-height:2.3;">
+        <div><span style="color:var(--accent); font-weight:700;">High weight words</span> — most representative of topic</div>
+        <div><span style="color:var(--accent); font-weight:700;">Low perplexity</span> — model fits data well</div>
+        <div><span style="color:var(--accent); font-weight:700;">Coherent topics</span> — words make semantic sense</div>
+        <div><span style="color:var(--accent); font-weight:700;">Overlapping topics</span> — normal for multithematic text</div>
+        <div><span style="color:var(--accent); font-weight:700;">Increase K</span> — for finer, narrower topics</div>
+        <div><span style="color:var(--accent); font-weight:700;">Decrease K</span> — for broader, general themes</div>
+        <div><span style="color:var(--accent); font-weight:700;">More documents</span> — better topic separation</div>
+      </div>
+    </div>
+
+    <a href="{% url 'home' %}" class="btn btn-primary btn-lg" style="justify-content:center;">
+      Start Analyzing
+    </a>
+
+  </div><!-- end right -->
+
+</div><!-- end grid -->
+
+{% endblock %}
