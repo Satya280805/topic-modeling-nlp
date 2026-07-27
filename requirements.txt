@@ -1,0 +1,15 @@
+# ── Web Framework ──────────────────────────────────────────────────────────
+Django>=4.2,<5.0
+
+# ── NLP & Machine Learning ────────────────────────────────────────────────
+scikit-learn>=1.3.0        # LDA model + CountVectorizer
+nltk>=3.8.1                # Tokenisation, stopwords, lemmatisation
+numpy>=1.24.0              # Array/matrix operations
+
+# ── Web Scraping ──────────────────────────────────────────────────────────
+requests>=2.31.0           # HTTP client for URL fetching
+beautifulsoup4>=4.12.0     # HTML parser for text extraction
+lxml>=4.9.3                # Fast HTML/XML parser (BS4 backend)
+
+# ── Utilities ─────────────────────────────────────────────────────────────
+Pillow>=10.0.0             # Image handling (Django dependency)
