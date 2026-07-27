@@ -1,0 +1,13 @@
+🌐 Scrape URL — 5 Samples
+Just paste these URLs directly into the URL field in the app:
+
+#URL							Expected Topics1
+https://en.wikipedia.org/wiki/Machine_learning		Algorithms, training, models, 							data, neural networks2
+
+https://en.wikipedia.org/wiki/Climate_change		Temperature, emissions, sea 							level, energy, policy3
+
+https://en.wikipedia.org/wiki/Football			Teams, players, tournaments, 							history, rules4
+
+https://en.wikipedia.org/wiki/Nutrition			Food, vitamins, diet, health, 							metabolism5
+
+https://en.wikipedia.org/wiki/Space_exploration		Rockets, NASA, missions, 							planets, astronauts
