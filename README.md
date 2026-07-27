@@ -214,4 +214,4 @@ I sincerely thank all my teammates for their valuable contributions, collaborati
 
 ## 📄 License
 
-This project is intended solely for **educational and academic purposes**.
+This project is intended solely for **educational and academic purposes onlyy**.
